@@ -1,0 +1,8 @@
+This is a placeholder file for the default book image.
+In a real deployment, you would replace this with an actual image file.
+You can download a book placeholder image from sites like:
+- https://picsum.photos/seed/book/200/300.jpg
+- https://via.placeholder.com/200x300/cccccc/666666?text=Book
+
+For now, the system will use CSS fallbacks and error handling to display
+appropriate placeholders when images are missing.
