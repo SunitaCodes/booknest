@@ -1,6 +1,5 @@
 <?php
 $page_title = "Admin Login";
-require_once '../includes/header.php';
 require_once '../includes/auth.php';
 
 // Redirect if already logged in
@@ -54,6 +53,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 }
+
+require_once '../includes/header.php';
 ?>
 
 <div class="admin-login-container">

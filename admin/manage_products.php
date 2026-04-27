@@ -1,6 +1,7 @@
 <?php
 $page_title = "Manage Products";
-require_once 'includes/admin-header.php';
+require_once '../includes/auth.php';
+require_admin();
 
 // Handle product actions
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -130,6 +131,8 @@ $products_result = $conn->query($products_query);
 // Get categories for filter
 $categories_query = "SELECT DISTINCT category FROM products ORDER BY category";
 $categories_result = $conn->query($categories_query);
+
+require_once 'includes/admin-header.php';
 ?>
 
 <div class="admin-products">

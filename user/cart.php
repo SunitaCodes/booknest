@@ -1,7 +1,7 @@
 <?php
 $page_title = "Shopping Cart";
-require_once '../includes/header.php';
 require_once '../includes/auth.php';
+require_login();
 require_user();
 
 $user_id = $_SESSION['user_id'];
@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     if (isset($_POST['remove_item'])) {
-        $cart_id = (int)$_POST['cart_id'];
+        $cart_id = (int)$_POST['remove_item'];
         $delete_query = "DELETE FROM cart WHERE id = $cart_id AND user_id = $user_id";
         $conn->query($delete_query);
         $_SESSION['message'] = "Item removed from cart!";
@@ -74,6 +74,8 @@ if ($cart_result && $cart_result->num_rows > 0) {
         $total_items += $item['quantity'];
     }
 }
+
+require_once '../includes/header.php';
 ?>
 
 <div class="container">
@@ -125,10 +127,7 @@ if ($cart_result && $cart_result->num_rows > 0) {
                             </div>
 
                             <div class="item-actions">
-                                <form method="POST" action="" style="display: inline;">
-                                    <input type="hidden" name="cart_id" value="<?php echo $item['cart_id']; ?>">
-                                    <button type="submit" name="remove_item" class="btn btn-danger btn-sm">Remove</button>
-                                </form>
+                                <button type="submit" name="remove_item" value="<?php echo $item['cart_id']; ?>" class="btn btn-danger btn-sm">Remove</button>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -155,9 +154,7 @@ if ($cart_result && $cart_result->num_rows > 0) {
                             <a href="checkout.php" class="btn btn-primary">Proceed to Checkout</a>
                         </div>
 
-                        <form method="POST" action="" style="margin-top: 10px;">
-                            <button type="submit" name="clear_cart" class="btn btn-outline btn-sm">Clear Cart</button>
-                        </form>
+                        <button type="submit" name="clear_cart" class="btn btn-outline btn-sm cart-clear-btn">Clear Cart</button>
 
                         <div class="continue-shopping">
                             <a href="../index.php">← Continue Shopping</a>

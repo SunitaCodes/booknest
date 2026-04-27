@@ -1,7 +1,7 @@
 <?php
 $page_title = "Checkout";
-require_once '../includes/header.php';
 require_once '../includes/auth.php';
+require_login();
 require_user();
 
 $user_id = $_SESSION['user_id'];
@@ -120,6 +120,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 }
+
+require_once '../includes/header.php';
 ?>
 
 <div class="container">
