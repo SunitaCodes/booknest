@@ -1,9 +1,10 @@
 <?php
 $page_title = "Home";
-require_once 'includes/header.php';
+require_once 'config/db.php';
 
 // Handle add to cart
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_to_cart'])) {
+// Do not rely on submit button name because JS may disable the button before POST is serialized.
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id']) && isset($_POST['quantity'])) {
     if (!is_logged_in()) {
         $_SESSION['message'] = "Please login to add items to cart.";
         $_SESSION['message_type'] = "error";
@@ -84,6 +85,8 @@ $total_pages = ceil($total_products / $per_page);
 // Get products
 $products_query = "SELECT * FROM products $where_clause ORDER BY created_at DESC LIMIT $per_page OFFSET $offset";
 $products_result = $conn->query($products_query);
+
+require_once 'includes/header.php';
 ?>
 
 <div class="hero-section">
@@ -175,6 +178,7 @@ $products_result = $conn->query($products_query);
                                 <?php endif; ?>
                             </div>
                             <form method="POST" action="" class="add-to-cart-form">
+                                <input type="hidden" name="add_to_cart" value="1">
                                 <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
                                 <div class="quantity-selector">
                                     <label for="quantity_<?php echo $product['id']; ?>">Qty:</label>

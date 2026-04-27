@@ -1,7 +1,7 @@
 <?php
-require_once '../includes/header.php';
 require_once '../includes/auth.php';
 require_admin();
+require_once '../includes/header.php';
 ?>
 
 <div class="admin-nav">

@@ -1,7 +1,7 @@
 <?php
 $page_title = "eSewa Payment";
-require_once '../includes/header.php';
 require_once '../includes/auth.php';
+require_login();
 require_user();
 
 if (!isset($_SESSION['order_id']) || !isset($_SESSION['total_price'])) {
@@ -16,133 +16,153 @@ $total_price = $_SESSION['total_price'];
 $merchant_code = "EPAYTEST";
 $success_url = "http://localhost/booknest/user/esewa-success.php";
 $failure_url = "http://localhost/booknest/user/esewa-failure.php";
-
+$secret       = "8gBm/:&EnhH.1/q";
 // Generate transaction ID
 $transaction_id = "BOOK" . time() . $order_id;
+
+$message   = "total_amount=$total_price,transaction_uuid=$transaction_id,product_code=$merchant_code";
+$signature = base64_encode(hash_hmac('sha256', $message, $secret, true));
+
+require_once '../includes/header.php';
 ?>
 
 <div class="container">
-    <div class="payment-page">
+    <div class="esewa-page">
         <div class="page-header">
             <h1>eSewa Payment</h1>
-            <p>Complete your payment securely through eSewa</p>
+            <p>Review your details and complete payment in one secure step.</p>
         </div>
 
-        <div class="payment-container">
-            <div class="payment-info">
-                <div class="order-details">
+        <div class="esewa-layout">
+            <div class="esewa-left">
+                <section class="esewa-card order-details">
                     <h3>Order Details</h3>
                     <div class="detail-row">
-                        <span>Order ID:</span>
+                        <span>Order ID</span>
                         <span>#<?php echo str_pad($order_id, 6, '0', STR_PAD_LEFT); ?></span>
                     </div>
                     <div class="detail-row">
-                        <span>Transaction ID:</span>
+                        <span>Transaction ID</span>
                         <span><?php echo $transaction_id; ?></span>
                     </div>
                     <div class="detail-row">
-                        <span>Amount:</span>
-                        <span class="amount">₹<?php echo number_format($total_price, 2); ?></span>
+                        <span>Amount</span>
+                        <span class="amount">Rs <?php echo number_format($total_price, 2); ?></span>
                     </div>
                     <div class="detail-row">
-                        <span>Payment Method:</span>
+                        <span>Payment Method</span>
                         <span>eSewa</span>
                     </div>
-                </div>
+                </section>
 
-                <div class="payment-steps">
+                <section class="esewa-card payment-steps">
                     <h3>How to Pay</h3>
                     <ol>
-                        <li>Click on "Proceed to eSewa" button below</li>
-                        <li>You will be redirected to eSewa payment gateway</li>
-                        <li>Login with your eSewa account</li>
-                        <li>Confirm the payment details</li>
-                        <li>Complete the payment</li>
-                        <li>You will be redirected back to our site</li>
+                        <li>Click "Proceed to eSewa".</li>
+                        <li>You will be redirected to the eSewa gateway.</li>
+                        <li>Login with your eSewa account.</li>
+                        <li>Confirm payment details and complete payment.</li>
+                        <li>You will return here after payment status is received.</li>
                     </ol>
-                </div>
+                </section>
 
-                <div class="test-credentials">
-                    <h3>Test Credentials (Sandbox)</h3>
-                    <p><strong>eSewa ID:</strong> 9806800000</p>
-                    <p><strong>Password:</strong> Nepal@123</p>
-                    <p><strong>MPIN:</strong> 1234</p>
-                    <small class="note">Use these credentials for testing purposes only</small>
-                </div>
+                <section class="esewa-card test-credentials">
+                    <h3>Sandbox Credentials</h3>
+                    <div class="credential-row"><span>eSewa IDs</span><strong>9806800001 / 9806800002 / 9806800003 / 9806800004 / 9806800005</strong></div>
+                    <div class="credential-row"><span>Password</span><strong>Nepal@123</strong></div>
+                    <div class="credential-row"><span>OTP</span><strong>123456</strong></div>
+                    <div class="credential-row"><span>MPIN</span><strong>1122</strong></div>
+                    <small class="note">Use only for test payments in sandbox.</small>
+                </section>
             </div>
 
-            <div class="payment-form">
+            <aside class="esewa-card esewa-right">
                 <h3>Ready to Pay?</h3>
-                <p class="payment-amount">Total Amount: <strong>₹<?php echo number_format($total_price, 2); ?></strong></p>
-                
-                <form action="https://uat.esewa.com.np/epay/main" method="POST" class="esewa-form">
-                    <input type="hidden" name="amt" value="<?php echo $total_price; ?>">
-                    <input type="hidden" name="psc" value="0">
-                    <input type="hidden" name="pdc" value="0">
-                    <input type="hidden" name="txAmt" value="0">
-                    <input type="hidden" name="tAmt" value="<?php echo $total_price; ?>">
-                    <input type="hidden" name="pid" value="<?php echo $transaction_id; ?>">
-                    <input type="hidden" name="scd" value="<?php echo $merchant_code; ?>">
-                    <input type="hidden" name="su" value="<?php echo $success_url; ?>">
-                    <input type="hidden" name="fu" value="<?php echo $failure_url; ?>">
-                    
-                    <button type="submit" class="btn btn-primary btn-large">
-                        <span class="esewa-icon">💳</span>
+                <p class="payment-amount">Total Amount</p>
+                <p class="payment-amount-value">Rs <?php echo number_format($total_price, 2); ?></p>
+                <p class="gateway-badge">UAT Sandbox Gateway</p>
+
+                <form action="https://rc-epay.esewa.com.np/api/epay/main/v2/form" method="POST" class="esewa-form">
+                    <input type="hidden" name="amount" value="<?php echo $total_price; ?>">
+                    <input type="hidden" name="product_service_charge" value="0">
+                    <input type="hidden" name="product_delivery_charge" value="0">
+                    <input type="hidden" name="tax_amount" value="0">
+                    <input type="hidden" name="total_amount" value="<?php echo $total_price; ?>">
+                    <input type="hidden" name="transaction_uuid" value="<?php echo $transaction_id; ?>">
+                    <input type="hidden" name="product_code" value="<?php echo $merchant_code; ?>">
+                    <input type="hidden" name="success_url" value="<?php echo $success_url; ?>">
+                    <input type="hidden" name="failure_url" value="<?php echo $failure_url; ?>">
+                    <input type="hidden" name="signed_field_names" value="total_amount,transaction_uuid,product_code">
+                    <input type="hidden" name="signature" value="<?php echo $signature; ?>">
+
+                    <button type="submit" class="btn btn-primary btn-large esewa-submit">
+                        <span class="esewa-icon">Pay</span>
                         Proceed to eSewa
                     </button>
                 </form>
 
                 <div class="payment-actions">
-                    <a href="checkout.php" class="btn btn-outline">← Back to Checkout</a>
+                    <a href="checkout.php" class="btn btn-outline">Back to Checkout</a>
                     <a href="cancel-payment.php" class="btn btn-danger">Cancel Payment</a>
                 </div>
-            </div>
+            </aside>
         </div>
 
         <div class="security-note">
             <div class="security-icon">🔒</div>
             <div>
                 <h4>Secure Payment</h4>
-                <p>Your payment information is secure and encrypted. eSewa uses industry-standard security measures to protect your transactions.</p>
+                <p>Payment is handled by eSewa over encrypted channels. This site does not store your eSewa credentials.</p>
             </div>
-        </div>
+        </section>
     </div>
 </div>
 
 <style>
-.payment-page {
-    max-width: 1000px;
+.esewa-page {
+    max-width: 1100px;
     margin: 0 auto;
-    padding: 20px 0;
+    padding: 24px 0 8px;
 }
 
-.payment-container {
+.esewa-layout {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
-    margin-top: 30px;
+    grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.85fr);
+    gap: 20px;
+    margin-top: 22px;
+    align-items: start;
 }
 
-.payment-info {
-    background: #f8f9fa;
-    padding: 25px;
-    border-radius: 10px;
+.esewa-left {
+    display: grid;
+    gap: 16px;
 }
 
-.order-details, .payment-steps, .test-credentials {
-    margin-bottom: 25px;
+.esewa-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
 }
 
-.order-details h3, .payment-steps h3, .test-credentials h3 {
-    margin-bottom: 15px;
-    color: #333;
+.order-details h3,
+.payment-steps h3,
+.test-credentials h3 {
+    margin-bottom: 12px;
+    color: #111827;
 }
 
 .detail-row {
     display: flex;
     justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid #dee2e6;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #eceff3;
+}
+
+.detail-row span:first-child {
+    color: #6b7280;
 }
 
 .detail-row:last-child {
@@ -150,87 +170,130 @@ $transaction_id = "BOOK" . time() . $order_id;
 }
 
 .amount {
-    font-size: 1.2em;
-    font-weight: bold;
-    color: #28a745;
+    font-size: 1.14rem;
+    font-weight: 700;
+    color: #16a34a;
 }
 
 .payment-steps ol {
-    padding-left: 20px;
+    padding-left: 18px;
+    margin: 0;
+    color: #374151;
 }
 
 .payment-steps li {
-    margin-bottom: 8px;
+    margin-bottom: 7px;
 }
 
 .test-credentials {
-    background: #fff3cd;
-    padding: 15px;
-    border-radius: 5px;
-    border-left: 4px solid #ffc107;
+    background: linear-gradient(180deg, #fef9c3 0%, #fff7d6 100%);
+    border-color: #f4d03f;
 }
 
-.test-credentials p {
-    margin: 5px 0;
+.credential-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px dashed rgba(146, 113, 20, 0.35);
+}
+
+.credential-row:last-of-type {
+    border-bottom: none;
+}
+
+.credential-row span {
+    color: #7c5b1f;
 }
 
 .note {
-    color: #856404;
+    display: block;
+    margin-top: 8px;
+    color: #8a6d1f;
     font-style: italic;
 }
 
-.payment-form {
+.esewa-right {
     text-align: center;
+    position: sticky;
+    top: 92px;
 }
 
 .payment-amount {
-    font-size: 1.5em;
-    margin-bottom: 25px;
+    margin: 2px 0 6px;
+    color: #6b7280;
+}
+
+.payment-amount-value {
+    margin: 0 0 10px;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.gateway-badge {
+    display: inline-block;
+    margin: 0 0 14px;
+    background: #dcfce7;
+    color: #166534;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 600;
 }
 
 .esewa-form {
-    margin-bottom: 25px;
+    margin-bottom: 16px;
 }
 
-.btn-large {
-    font-size: 1.1em;
-    padding: 15px 30px;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.esewa-icon {
-    font-size: 1.2em;
+.esewa-submit {
+    width: 100%;
+    justify-content: center;
 }
 
 .payment-actions {
-    display: flex;
+    display: grid;
     gap: 10px;
-    justify-content: center;
 }
 
 .security-note {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 15px;
-    background: #d1ecf1;
-    padding: 20px;
-    border-radius: 10px;
-    margin-top: 30px;
+    margin-top: 18px;
 }
 
 .security-icon {
-    font-size: 2em;
+    background: #e6f4ff;
+    color: #1d4ed8;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-top: 2px;
+}
+
+.security-note h4 {
+    margin-bottom: 4px;
+}
+
+.security-note p {
+    margin: 0;
+    color: #4b5563;
 }
 
 @media (max-width: 768px) {
-    .payment-container {
+    .esewa-layout {
         grid-template-columns: 1fr;
     }
-    
+
+    .esewa-right {
+        position: static;
+    }
+
     .payment-actions {
-        flex-direction: column;
+        grid-template-columns: 1fr;
     }
 }
 </style>

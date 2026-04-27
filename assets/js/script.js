@@ -290,7 +290,7 @@ function animateAddToCart(button) {
     
     setTimeout(() => {
         button.style.transform = 'scale(1)';
-        button.textContent = 'Add to Cart';
+        button.textContent = 'Add to Cart test';
         button.style.background = '';
     }, 1000);
 }

@@ -185,7 +185,7 @@ function is_admin() {
                             <div class="category"><?php echo htmlspecialchars($product['category']); ?></div>
                             <div style="font-size: 3em; margin-bottom: 20px;">📚</div>
                             <?php if (is_logged_in()): ?>
-                                <button class="btn">Add to Cart</button>
+                                <button class="btn">Add to Cart clean</button>
                             <?php else: ?>
                                 <a href="?page=login" class="btn">Login to Buy</a>
                             <?php endif; ?>
